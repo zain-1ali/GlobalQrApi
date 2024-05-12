@@ -15,7 +15,17 @@ const allowedOrigins = ["http://localhost:5173"]; // Add other domains as needed
 //   credentials: true,
 //   optionSuccessStatus: 200,
 // };
-app.use(cors({ origin: "*" }));
+
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
+
+var corsOptions = {
+  origin: "http://localhost:5173",
+  methods: "GET,POST",
+  allowedHeaders: "Content-Type",
+  optionsSuccessStatus: 200,
+};
+app.use(cors(corsOptions));
 app.use("/public/images", express.static("public/images"));
 
 app.use(express.json());
@@ -26,7 +36,7 @@ app.use("/api/qr/", qrroutes);
 app.use("/api/analytics/", statsroutes);
 
 connectDb();
-let prot = process.env.port || 5000;
+let prot = process.env.port || 3000;
 app.listen(prot, () => {
   console.log(`server is running on port ${prot}`);
 });
