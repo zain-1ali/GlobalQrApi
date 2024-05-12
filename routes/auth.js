@@ -10,7 +10,6 @@ const router = express.Router();
 
 // Register route
 router.post("/register", SignupController);
-
 // Login route
 router.post("/login", SigninController);
 

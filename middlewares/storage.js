@@ -36,11 +36,11 @@ let storage = multer.diskStorage({
   },
 
   filename: (req, file, cb) => {
-    let date = new Date.now();
+    // let date = new Date.now();
     cb(
       null,
       file.fieldname === "logo"
-        ? file.fieldname + date
+        ? file.fieldname + "abcf"
         : file.fieldname + "-" + req.userId + path.extname(file.originalname)
     );
   },

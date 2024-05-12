@@ -1,6 +1,7 @@
 import userModel from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import Jwt from "jsonwebtoken";
+import analyticsModel from "../models/analyticsModel.js";
 
 export let SignupController = async (req, res, next) => {
   if (!req.body.email) {
@@ -25,6 +26,10 @@ export let SignupController = async (req, res, next) => {
     email: req.body.email,
     password: bcryptpassword,
     isAdmin: false,
+  });
+
+  await analyticsModel.create({
+    userId: newUser?._id,
   });
 
   res.status(200).send({ status: true, msg: "new user created successfuly" });

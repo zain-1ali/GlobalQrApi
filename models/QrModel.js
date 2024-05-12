@@ -23,15 +23,15 @@ let qrModel = new mongoose.Schema({
   },
   bodyShape: {
     type: String,
-    default: "s1",
+    default: "square",
   },
   eyeShape: {
     type: String,
-    default: "s1",
+    default: "0,0,0,0",
   },
   frameShape: {
     type: String,
-    default: "s1",
+    default: "0,0,0,0",
   },
   status: {
     type: Boolean,
