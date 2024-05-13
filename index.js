@@ -21,9 +21,8 @@ app.use(express.json());
 
 var corsOptions = {
   origin: "http://localhost:5173",
-  methods: "GET,POST",
-  allowedHeaders: "Content-Type",
-  optionsSuccessStatus: 200,
+  credentials: true, //access-control-allow-credentials:true
+  optionSuccessStatus: 200,
 };
 app.use(cors(corsOptions));
 app.use("/public/images", express.static("public/images"));
