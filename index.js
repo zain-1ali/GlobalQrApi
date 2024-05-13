@@ -36,7 +36,7 @@ app.use("/api/qr/", qrroutes);
 app.use("/api/analytics/", statsroutes);
 
 connectDb();
-let prot = process.env.port || 4000;
+let prot = process.env.PORT || 4000;
 app.listen(prot, () => {
   console.log(`server is running on port ${prot}`);
 });
