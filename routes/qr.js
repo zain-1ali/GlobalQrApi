@@ -20,7 +20,7 @@ router.post(
 );
 
 // get qr by id route
-router.get("/getSingle", userAuth, getSingleQr);
+router.post("/getSingle", userAuth, getSingleQr);
 
 // get qr by user id route
 router.get("/getAll", userAuth, getQrByUserid);
