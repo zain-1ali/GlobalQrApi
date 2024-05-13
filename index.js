@@ -24,7 +24,7 @@ var corsOptions = {
   credentials: true, //access-control-allow-credentials:true
   optionSuccessStatus: 200,
 };
-app.use(cors(corsOptions));
+app.use(cors({ origin: "*" }));
 app.use("/public/images", express.static("public/images"));
 
 app.use(express.json());
