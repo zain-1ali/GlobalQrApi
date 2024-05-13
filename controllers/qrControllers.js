@@ -19,26 +19,27 @@ export let createQrController = async (req, res, next) => {
       qrId,
       logo,
     } = req.body;
+
     const userId = req.userId;
-    let logoData = Buffer.from(logo, "base64");
+    // let logoData = Buffer.from(logo, "base64");
     // fs.writeFile(logoData, "my-file.png");
-    fs.writeFile(
-      "public/images/abc.jpg",
-      logoData,
-      {
-        encoding: "utf8",
-        flag: "w",
-        mode: 0o666,
-      },
-      (err) => {
-        if (err) console.log(err);
-        else {
-          console.log("File written successfully\n");
-          console.log("The written has the following contents:");
-          // console.log(fs.readFileSync("movies.txt", "utf8"));
-        }
-      }
-    );
+    // fs.writeFile(
+    //   "public/images/abc.jpg",
+    //   logoData,
+    //   {
+    //     encoding: "utf8",
+    //     flag: "w",
+    //     mode: 0o666,
+    //   },
+    //   (err) => {
+    //     if (err) console.log(err);
+    //     else {
+    //       console.log("File written successfully\n");
+    //       console.log("The written has the following contents:");
+    //       console.log(fs.readFileSync("movies.txt", "utf8"));
+    //     }
+    //   }
+    // );
 
     if (!url) {
       res
@@ -100,77 +101,98 @@ export let createQrController = async (req, res, next) => {
       res.status(200).send({ status: true, msg: "Qr created successfuly" });
     }
   } catch (error) {
+    res
+      .status(500)
+      .send({ status: false, msg: "internal server error", error });
     console.log(error);
   }
 };
 
 export let getSingleQr = async (req, res, next) => {
-  const { qrId } = req.body;
-  const userId = req.userId;
-  if (!qrId) {
-    res.status(500).send({ status: false, msg: "internel server error" });
-  }
-  if (!userId) {
-    res.status(401).send({ status: false, msg: "Unautherized!" });
-  }
+  try {
+    const { qrId } = req.body;
+    const userId = req.userId;
+    if (!qrId) {
+      res.status(500).send({ status: false, msg: "internel server error" });
+    }
+    if (!userId) {
+      res.status(401).send({ status: false, msg: "Unautherized!" });
+    }
 
-  const singleQr = await QrModel.findOne({ _id: qrId });
+    const singleQr = await QrModel.findOne({ _id: qrId });
 
-  if (singleQr) {
-    res.status(200).send({ status: true, msg: "success", data: singleQr });
-  } else {
-    res.status(404).send({ status: false, msg: "Qr not found" });
+    if (singleQr) {
+      res.status(200).send({ status: true, msg: "success", data: singleQr });
+    } else {
+      res.status(404).send({ status: false, msg: "Qr not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .send({ status: false, msg: "internal server error", error });
   }
 };
 
 export let getQrByUserid = async (req, res, next) => {
-  const userId = req.userId;
-  if (!userId) {
-    res.status(401).send({ status: false, msg: "Unautherized!" });
-  }
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      res.status(401).send({ status: false, msg: "Unautherized!" });
+    }
 
-  const allQrs = await QrModel.find({ userId: userId });
+    const allQrs = await QrModel.find({ userId: userId });
 
-  if (allQrs) {
-    res.status(200).send({ status: true, msg: "success", data: allQrs });
-  } else {
-    res.status(404).send({ status: false, msg: "Qrs not found" });
+    if (allQrs) {
+      res.status(200).send({ status: true, msg: "success", data: allQrs });
+    } else {
+      res.status(404).send({ status: false, msg: "Qrs not found" });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .send({ status: false, msg: "internal server error", error });
   }
 };
 
 export let scanQr = async (req, res, next) => {
-  const qrId = req?.params?.id;
-  const reqiureQr = await QrModel.findOne({ _id: qrId });
+  try {
+    const qrId = req?.params?.id;
+    const reqiureQr = await QrModel.findOne({ _id: qrId });
 
-  if (!reqiureQr) {
-    res.status(400).send({ status: false, msg: "Qr not found" });
-  }
-
-  const UpdatedQr = await QrModel.findByIdAndUpdate(
-    { _id: qrId },
-    {
-      totalScans: reqiureQr?.totalScans + 1,
+    if (!reqiureQr) {
+      res.status(400).send({ status: false, msg: "Qr not found" });
     }
-  );
 
-  console.log(reqiureQr?.userId);
+    const UpdatedQr = await QrModel.findByIdAndUpdate(
+      { _id: qrId },
+      {
+        totalScans: reqiureQr?.totalScans + 1,
+      }
+    );
 
-  const Updatedanalytics = await analyticsModel.findOneAndUpdate(
-    { userId: reqiureQr?.userId },
-    {
-      $inc: { totalQrScan: 1 },
-    },
-    { new: true }
-  );
+    console.log(reqiureQr?.userId);
 
-  if (!Updatedanalytics) {
-    return res.status(404).json({ error: "analyics Document not found" });
+    const Updatedanalytics = await analyticsModel.findOneAndUpdate(
+      { userId: reqiureQr?.userId },
+      {
+        $inc: { totalQrScan: 1 },
+      },
+      { new: true }
+    );
+
+    if (!Updatedanalytics) {
+      return res.status(404).json({ error: "analyics Document not found" });
+    }
+
+    const createScan = await scanModel.create({
+      qrId,
+      userId: reqiureQr?.userId,
+    });
+
+    await open(reqiureQr.url);
+  } catch (error) {
+    res
+      .status(500)
+      .send({ status: false, msg: "internal server error", error });
   }
-
-  const createScan = await scanModel.create({
-    qrId,
-    userId: reqiureQr?.userId,
-  });
-
-  await open(reqiureQr.url);
 };
