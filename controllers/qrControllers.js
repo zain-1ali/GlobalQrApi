@@ -65,10 +65,11 @@ export let createQrController = async (req, res, next) => {
           bodyShape,
           eyeShape,
           frameShape,
-          logo:
-            req.files["logo"]?.length === 1
+          logo: req.files
+            ? req.files["logo"]?.length === 1
               ? `http://localhost:4000/public/images/${req.files["logo"][0].filename}`
-              : qrExists?.logo,
+              : ""
+            : "",
         }
       );
       res.status(200).send({ status: true, msg: "Qr updated successfuly" });
