@@ -155,44 +155,88 @@ export let getQrByUserid = async (req, res, next) => {
   }
 };
 
+// export let scanQr = async (req, res, next) => {
+//   try {
+//     const qrId = req?.params?.id;
+//     const reqiureQr = await QrModel.findOne({ _id: qrId });
+
+//     if (!reqiureQr) {
+//       res.status(400).send({ status: false, msg: "Qr not found" });
+//     }
+
+//     const UpdatedQr = await QrModel.findByIdAndUpdate(
+//       { _id: qrId },
+//       {
+//         totalScans: reqiureQr?.totalScans + 1,
+//       }
+//     );
+
+//     console.log(reqiureQr?.userId);
+
+//     const Updatedanalytics = await analyticsModel.findOneAndUpdate(
+//       { userId: reqiureQr?.userId },
+//       {
+//         $inc: { totalQrScan: 1 },
+//       },
+//       { new: true }
+//     );
+
+//     if (!Updatedanalytics) {
+//       return res.status(404).json({ error: "analyics Document not found" });
+//     }
+
+//     const createScan = await scanModel.create({
+//       qrId,
+//       userId: reqiureQr?.userId,
+//     });
+
+//     return res.redirect(reqiureQr.url);
+//   } catch (error) {
+//     res
+//       .status(500)
+//       .send({ status: false, msg: "internal server error", error });
+//   }
+// };
+
 export let scanQr = async (req, res, next) => {
   try {
     const qrId = req?.params?.id;
-    const reqiureQr = await QrModel.findOne({ _id: qrId });
+    console.log(`Received QR ID: ${qrId}`);
 
+    const reqiureQr = await QrModel.findOne({ _id: qrId });
     if (!reqiureQr) {
-      res.status(400).send({ status: false, msg: "Qr not found" });
+      return res.status(400).send({ status: false, msg: "Qr not found" });
     }
+    console.log(`Found QR: ${JSON.stringify(reqiureQr)}`);
 
     const UpdatedQr = await QrModel.findByIdAndUpdate(
-      { _id: qrId },
-      {
-        totalScans: reqiureQr?.totalScans + 1,
-      }
-    );
-
-    console.log(reqiureQr?.userId);
-
-    const Updatedanalytics = await analyticsModel.findOneAndUpdate(
-      { userId: reqiureQr?.userId },
-      {
-        $inc: { totalQrScan: 1 },
-      },
+      qrId,
+      { totalScans: reqiureQr.totalScans + 1 },
       { new: true }
     );
+    console.log(`Updated QR: ${JSON.stringify(UpdatedQr)}`);
 
+    const Updatedanalytics = await analyticsModel.findOneAndUpdate(
+      { userId: reqiureQr.userId },
+      { $inc: { totalQrScan: 1 } },
+      { new: true }
+    );
     if (!Updatedanalytics) {
-      return res.status(404).json({ error: "analyics Document not found" });
+      return res.status(404).json({ error: "analytics Document not found" });
     }
+    console.log(`Updated analytics: ${JSON.stringify(Updatedanalytics)}`);
 
     const createScan = await scanModel.create({
       qrId,
-      userId: reqiureQr?.userId,
+      userId: reqiureQr.userId,
     });
+    console.log(`Created scan: ${JSON.stringify(createScan)}`);
 
+    // Using res.redirect instead of open for server environment
     return res.redirect(reqiureQr.url);
   } catch (error) {
-    res
+    console.error("Error occurred:", error);
+    return res
       .status(500)
       .send({ status: false, msg: "internal server error", error });
   }
