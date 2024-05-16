@@ -203,9 +203,14 @@ export let scanQr = async (req, res, next) => {
     const qrId = req?.params?.id;
     console.log(`Received QR ID: ${qrId}`);
 
+    // Validate the qrId is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(qrId)) {
+      return res.status(400).send({ status: false, msg: "Invalid QR ID" });
+    }
+
     const reqiureQr = await QrModel.findOne({ _id: qrId });
     if (!reqiureQr) {
-      return res.status(400).send({ status: false, msg: "Qr not found" });
+      return res.status(400).send({ status: false, msg: "QR not found" });
     }
     console.log(`Found QR: ${JSON.stringify(reqiureQr)}`);
 
@@ -222,7 +227,7 @@ export let scanQr = async (req, res, next) => {
       { new: true }
     );
     if (!Updatedanalytics) {
-      return res.status(404).json({ error: "analytics Document not found" });
+      return res.status(404).json({ error: "Analytics document not found" });
     }
     console.log(`Updated analytics: ${JSON.stringify(Updatedanalytics)}`);
 
@@ -232,12 +237,12 @@ export let scanQr = async (req, res, next) => {
     });
     console.log(`Created scan: ${JSON.stringify(createScan)}`);
 
-    // Using res.redirect instead of open for server environment
+    // Use res.redirect instead of open for server environment
     return res.redirect(reqiureQr.url);
   } catch (error) {
     console.error("Error occurred:", error);
     return res
       .status(500)
-      .send({ status: false, msg: "internal server error", error });
+      .send({ status: false, msg: "Internal server error", error });
   }
 };
