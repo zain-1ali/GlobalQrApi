@@ -223,7 +223,7 @@ export let deleteQr = async (req, res, next) => {
       res.status(404).send({ status: false, msg: "Qr not found" });
     }
 
-    await QrModel.remove({ _id: qrId });
+    await QrModel.findByIdAndDelete(qrId);
     const allQrs = await QrModel.find({ userId: userId });
     res
       .status(200)
