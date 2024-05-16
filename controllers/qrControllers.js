@@ -190,7 +190,7 @@ export let scanQr = async (req, res, next) => {
       userId: reqiureQr?.userId,
     });
 
-    await open(reqiureQr.url);
+    return res.redirect(reqiureQr.url);
   } catch (error) {
     res
       .status(500)
