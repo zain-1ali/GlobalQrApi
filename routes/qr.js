@@ -30,6 +30,6 @@ router.get("/getAll", userAuth, getQrByUserid);
 router.get("/:id", scanQr);
 
 // scan qr
-router.post("/delete", deleteQr);
+router.post("/delete", userAuth, deleteQr);
 
 export default router;
