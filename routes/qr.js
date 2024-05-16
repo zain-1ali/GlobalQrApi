@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createQrController,
+  deleteQr,
   getQrByUserid,
   getSingleQr,
   scanQr,
@@ -27,5 +28,8 @@ router.get("/getAll", userAuth, getQrByUserid);
 
 // scan qr
 router.get("/:id", scanQr);
+
+// scan qr
+router.post("/delete", deleteQr);
 
 export default router;

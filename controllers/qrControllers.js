@@ -206,6 +206,35 @@ export let scanQr = async (req, res, next) => {
   }
 };
 
+export let deleteQr = async (req, res, next) => {
+  try {
+    const { qrId } = req.body;
+    const userId = req.userId;
+    if (!qrId) {
+      res.status(500).send({ status: false, msg: "internel server error" });
+    }
+    if (!userId) {
+      res.status(401).send({ status: false, msg: "Unautherized!" });
+    }
+
+    const singleQr = await QrModel.findOne({ _id: qrId });
+
+    if (!singleQr) {
+      res.status(404).send({ status: false, msg: "Qr not found" });
+    }
+
+    await QrModel.remove({ _id: qrId });
+    const allQrs = await QrModel.find({ userId: userId });
+    res
+      .status(200)
+      .send({ status: true, msg: "Qr deleted successfuly", data: allQrs });
+  } catch (error) {
+    res
+      .status(500)
+      .send({ status: false, msg: "internal server error", error });
+  }
+};
+
 // export let scanQr = async (req, res, next) => {
 //   try {
 //     const qrId = req?.params?.id;
