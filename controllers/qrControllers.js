@@ -190,7 +190,15 @@ export let scanQr = async (req, res, next) => {
       userId: reqiureQr?.userId,
     });
 
-    return res.redirect(reqiureQr.url);
+    const checkIfUrl = (url) => {
+      if (url?.includes("https://") || url?.includes("http://")) {
+        return url;
+      } else {
+        return `https://${url}`;
+      }
+    };
+
+    return res.redirect(checkIfUrl(reqiureQr.url));
   } catch (error) {
     res
       .status(500)
