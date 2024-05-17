@@ -136,8 +136,6 @@ export let getScansAnalytics = async (req, res, next) => {
           {
             $match: {
               qrId: qrId,
-            },
-            $match: {
               timestamp: { $gte: startDate, $lt: endDate },
             },
           },
