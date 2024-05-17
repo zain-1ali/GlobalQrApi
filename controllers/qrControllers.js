@@ -7,6 +7,7 @@ import scanModel from "../models/scanModel.js";
 export let createQrController = async (req, res, next) => {
   try {
     const {
+      name,
       url,
       forColor,
       bgColor,
@@ -58,6 +59,7 @@ export let createQrController = async (req, res, next) => {
       let updateQr = await QrModel.findByIdAndUpdate(
         { _id: qrId },
         {
+          name,
           url,
           forColor,
           bgColor,
@@ -75,6 +77,7 @@ export let createQrController = async (req, res, next) => {
       res.status(200).send({ status: true, msg: "Qr updated successfuly" });
     } else {
       let newQr = await QrModel.create({
+        name,
         url,
         forColor,
         bgColor,
