@@ -214,6 +214,7 @@ export let deleteQr = async (req, res, next) => {
     const { qrId } = req.body;
     const userId = req.userId;
     if (!qrId) {
+      console.log(qrId);
       res.status(500).send({ status: false, msg: "qr id is required" });
     }
     if (!userId) {
