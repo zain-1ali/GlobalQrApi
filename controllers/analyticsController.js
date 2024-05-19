@@ -91,11 +91,12 @@ export let updateAnalytics = async (req, res, next) => {
           }
         );
 
-        await QrModel.findByIdAndUpdate(
+        var updatedQr = await QrModel.findByIdAndUpdate(
           { _id: qrId },
           {
             status: true,
-          }
+          },
+          { new: true }
         );
       } else if (req.body.status === false) {
         await analyticsModel.findByIdAndUpdate(
@@ -106,13 +107,17 @@ export let updateAnalytics = async (req, res, next) => {
           }
         );
 
-        await QrModel.findByIdAndUpdate(
+        var updatedQr = await QrModel.findByIdAndUpdate(
           { _id: qrId },
           {
             status: false,
-          }
+          },
+          { new: true }
         );
       }
+      res
+        .status(200)
+        .send({ status: true, msg: "status updated successfuly", updatedQr });
     } else if (type === "scan") {
       await analyticsModel.findByIdAndUpdate(
         { _id: analyticsExist?._id },
@@ -123,8 +128,6 @@ export let updateAnalytics = async (req, res, next) => {
     } else {
       res.status(500).send({ status: false, msg: "invalid type" });
     }
-
-    res.status(200).send({ status: true, msg: "user updated successfuly" });
   } catch (error) {
     console.log(error);
     res
