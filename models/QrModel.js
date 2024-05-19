@@ -45,10 +45,22 @@ let qrModel = new mongoose.Schema({
     type: Number,
     default: 0,
   },
+  totalDownloads: {
+    type: Number,
+    default: 0,
+  },
+  totalDownloadsThisMonth: {
+    type: Number,
+    default: 0,
+  },
   userId: {
     type: mongoose.Types.ObjectId,
     ref: "User",
     require: true,
+  },
+  updatedMonth: {
+    type: Number,
+    default: Date.now(),
   },
 });
 

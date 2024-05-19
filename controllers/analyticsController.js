@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 import analyticsModel from "../models/analyticsModel.js";
 import scanModel from "../models/scanModel.js";
+import QrModel from "../models/QrModel.js";
 
 export let updateAnalytics = async (req, res, next) => {
   try {
-    const { type } = req.body;
+    const { type, qrId } = req.body;
     const userId = req.userId;
 
     if (!userId) {
@@ -22,7 +23,13 @@ export let updateAnalytics = async (req, res, next) => {
       res.status(500).send({ status: false, msg: "invalid type" });
     }
 
-    let analyticsExist = await userModel.findOne({ userId });
+    let analyticsExist = await analyticsModel.findOne({ userId });
+    if (qrId) {
+      var qrExist = await QrModel.findOne({ _id: qrId });
+      if (!qrExist) {
+        res.status(404).send({ status: false, msg: "Qr not found" });
+      }
+    }
 
     if (!analyticsExist) {
       res.status(404).send({ status: false, msg: "Analytics not found" });
@@ -40,7 +47,9 @@ export let updateAnalytics = async (req, res, next) => {
       let currentDate = Date.now();
       const oneWeek = 7 * 24 * 60 * 60 * 1000;
       const oneMonth = 30 * 24 * 60 * 60 * 1000;
-      if (currentDate < analyticsExist?.updatedAnalytics + oneMonth) {
+
+      // ----------------------------------updating analytics----------------------------------------
+      if (currentDate < analyticsExist?.updatedMonth + oneMonth) {
         await analyticsModel.findByIdAndUpdate(
           { _id: analyticsExist?._id },
           {
@@ -59,6 +68,27 @@ export let updateAnalytics = async (req, res, next) => {
           }
         );
       }
+
+      // ----------------------------------updating qr----------------------------------------
+
+      if (currentDate < qrExist?.updatedMonth + oneMonth) {
+        await QrModel.findByIdAndUpdate(
+          { _id: qrExist?._id },
+          {
+            totalDownloads: qrExist?.totalDownloads + 1,
+            totalDownloadsThisMonth: qrExist?.totalDownloadsThisMonth + 1,
+          }
+        );
+      } else {
+        await QrModel.findByIdAndUpdate(
+          { _id: qrExist?._id },
+          {
+            totalDownloads: qrExist?.totalDownloads + 1,
+            totalDownloadsThisMonth: 0,
+            updatedMonth: Date.now(),
+          }
+        );
+      }
     } else if (type === "status") {
       if (req.body.status === true) {
         await analyticsModel.findByIdAndUpdate(
@@ -68,12 +98,26 @@ export let updateAnalytics = async (req, res, next) => {
             inactiveQrs: analyticsExist?.inactiveQrs - 1,
           }
         );
+
+        await QrModel.findByIdAndUpdate(
+          { _id: qrId },
+          {
+            status: true,
+          }
+        );
       } else if (req.body.status === false) {
         await analyticsModel.findByIdAndUpdate(
           { _id: analyticsExist?._id },
           {
             activeQrs: analyticsExist?.activeQrs - 1,
             inactiveQrs: analyticsExist?.inactiveQrs + 1,
+          }
+        );
+
+        await QrModel.findByIdAndUpdate(
+          { _id: qrId },
+          {
+            status: false,
           }
         );
       }
@@ -171,9 +215,7 @@ export let getScansAnalytics = async (req, res, next) => {
 
         const result2 = await scanModel.aggregate([
           {
-            $match: {
-              qrId: qrId,
-            },
+            qrId: qrId,
             $match: {
               timestamp: { $gte: startDate, $lt: endDate },
             },
@@ -213,8 +255,6 @@ export let getScansAnalytics = async (req, res, next) => {
             {
               $match: {
                 qrId: qrId,
-              },
-              $match: {
                 timestamp: { $gte: startDate, $lt: endDate },
               },
             },
@@ -255,8 +295,6 @@ export let getScansAnalytics = async (req, res, next) => {
           {
             $match: {
               userId: userId,
-            },
-            $match: {
               timestamp: { $gte: startDate, $lt: endDate },
             },
           },
@@ -294,8 +332,6 @@ export let getScansAnalytics = async (req, res, next) => {
           {
             $match: {
               userId: userId,
-            },
-            $match: {
               timestamp: { $gte: startDate, $lt: endDate },
             },
           },
@@ -334,8 +370,6 @@ export let getScansAnalytics = async (req, res, next) => {
             {
               $match: {
                 userId: userId,
-              },
-              $match: {
                 timestamp: { $gte: startDate, $lt: endDate },
               },
             },
