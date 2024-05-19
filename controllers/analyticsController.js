@@ -82,6 +82,7 @@ export let updateAnalytics = async (req, res, next) => {
         );
       }
     } else if (type === "status") {
+      var allqr = await QrModel.find({ userId: userId });
       if (req.body.status === true) {
         await analyticsModel.findByIdAndUpdate(
           { _id: analyticsExist?._id },
@@ -117,7 +118,7 @@ export let updateAnalytics = async (req, res, next) => {
       }
       res
         .status(200)
-        .send({ status: true, msg: "status updated successfuly", updatedQr });
+        .send({ status: true, msg: "status updated successfuly", data: allqr });
     } else if (type === "scan") {
       await analyticsModel.findByIdAndUpdate(
         { _id: analyticsExist?._id },
