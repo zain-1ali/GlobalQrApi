@@ -14,14 +14,6 @@ export let updateAnalytics = async (req, res, next) => {
     if (!type) {
       res.status(500).send({ status: false, msg: "type is required" });
     }
-    if (
-      type != "download" ||
-      type != "create" ||
-      type != "status" ||
-      type != "scan"
-    ) {
-      res.status(500).send({ status: false, msg: "invalid type" });
-    }
 
     let analyticsExist = await analyticsModel.findOne({ userId });
     if (qrId) {
@@ -128,6 +120,8 @@ export let updateAnalytics = async (req, res, next) => {
           totalQrScan: analyticsExist?.totalQrScan + 1,
         }
       );
+    } else {
+      res.status(500).send({ status: false, msg: "invalid type" });
     }
 
     res.status(200).send({ status: true, msg: "user updated successfuly" });
