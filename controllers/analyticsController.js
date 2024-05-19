@@ -81,6 +81,7 @@ export let updateAnalytics = async (req, res, next) => {
           }
         );
       }
+      res.status(200).send({ status: true, msg: "info updated successfuly" });
     } else if (type === "status") {
       if (req.body.status === true) {
         await analyticsModel.findByIdAndUpdate(
