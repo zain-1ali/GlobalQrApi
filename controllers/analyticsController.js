@@ -132,6 +132,7 @@ export let updateAnalytics = async (req, res, next) => {
 
     res.status(200).send({ status: true, msg: "user updated successfuly" });
   } catch (error) {
+    console.log(error);
     res
       .status(500)
       .send({ status: false, msg: "internal server error", error });
