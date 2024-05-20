@@ -206,7 +206,9 @@ export let getScansAnalytics = async (req, res, next) => {
           return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
         });
         // console.log(daysData);
-        res.status(200).send({ status: true, data: daysData, qrId });
+        res
+          .status(200)
+          .send({ status: true, data: daysData, qrId, result: result });
       } else if (type === "monthly") {
         console.log("monthly");
         const endDate = new Date(); // Current date
