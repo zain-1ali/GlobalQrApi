@@ -13,7 +13,7 @@ const router = express.Router();
 // Register route
 router.post("/update", userAuth, updateAnalytics);
 // Login route
-router.get("/get", userAuth, getAnalytics);
+router.post("/get", userAuth, getAnalytics);
 
 router.post("/scans", userAuth, getScansAnalytics);
 
