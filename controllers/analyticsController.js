@@ -141,17 +141,37 @@ export let updateAnalytics = async (req, res, next) => {
 export let getAnalytics = async (req, res, next) => {
   try {
     const userId = req.userId;
+    const { qrId } = req.body;
     if (!userId) {
       res.status(401).send({ status: false, msg: "Unautherized" });
     }
 
-    let analyticsExist = await analyticsModel.findOne({ userId });
+    if (qrId) {
+      let qrExist = await QrModel.findOne({ qrId });
+      if (!qrExist) {
+        res.status(404).send({ status: false, msg: "Qr not found!" });
+      }
 
-    if (!analyticsExist) {
-      res.status(404).send({ status: false, msg: "Data not found!" });
+      res.status(200).send({
+        status: true,
+        data: {
+          totalQrs: 0,
+          activeQrs: 0,
+          inactiveQrs: 0,
+          totalQrDownload: qrExist?.totalDownloadsThisMonth,
+          totalQrScan: qrExist?.totalScans,
+          totalQrDownloadCrntMonth: qrExist?.totalDownloadsThisMonth,
+        },
+      });
+    } else {
+      let analyticsExist = await analyticsModel.findOne({ userId });
+
+      if (!analyticsExist) {
+        res.status(404).send({ status: false, msg: "Data not found!" });
+      }
+
+      res.status(200).send({ status: true, data: analyticsExist });
     }
-
-    res.status(200).send({ status: true, data: analyticsExist });
   } catch (error) {
     res
       .status(500)
