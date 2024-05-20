@@ -215,8 +215,8 @@ export let getScansAnalytics = async (req, res, next) => {
 
         const result2 = await scanModel.aggregate([
           {
-            qrId: qrId,
             $match: {
+              qrId: qrId,
               timestamp: { $gte: startDate, $lt: endDate },
             },
           },
