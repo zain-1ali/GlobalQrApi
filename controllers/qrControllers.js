@@ -166,6 +166,10 @@ export let scanQr = async (req, res, next) => {
     if (!reqiureQr) {
       res.status(400).send({ status: false, msg: "Qr not found" });
     }
+    await scanModel.create({
+      qrId,
+      userId: reqiureQr?.userId,
+    });
 
     const UpdatedQr = await QrModel.findByIdAndUpdate(
       { _id: qrId },
@@ -187,11 +191,6 @@ export let scanQr = async (req, res, next) => {
     if (!Updatedanalytics) {
       return res.status(404).json({ error: "analyics Document not found" });
     }
-
-    const createScan = await scanModel.create({
-      qrId,
-      userId: reqiureQr?.userId,
-    });
 
     const checkIfUrl = (url) => {
       if (url?.includes("https://") || url?.includes("http://")) {
