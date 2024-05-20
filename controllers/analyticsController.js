@@ -147,7 +147,7 @@ export let getAnalytics = async (req, res, next) => {
     }
 
     if (qrId) {
-      let qrExist = await QrModel.findOne({ qrId });
+      let qrExist = await QrModel.findOne({ _id: qrId });
       if (!qrExist) {
         res.status(404).send({ status: false, msg: "Qr not found!" });
       }
