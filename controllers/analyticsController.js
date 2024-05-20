@@ -169,100 +169,26 @@ export let getScansAnalytics = async (req, res, next) => {
     }
     console.log(userId);
     console.log("the type", type);
-    if (qrId) {
-      if (type === "weakly") {
-        console.log("weakly");
-        const endDate = new Date(); // Current date
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 7); // Date 7 days ago
+    try {
+      if (qrId) {
+        if (type === "weakly") {
+          console.log("weakly");
+          const endDate = new Date(); // Current date
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7); // Date 7 days ago
 
-        const result = await scanModel.aggregate([
-          {
-            $match: {
-              timestamp: { $gte: startDate, $lt: endDate },
-              qrId: "664b29b604e16c4b3d8b89d8",
-            },
-          },
-          {
-            $group: {
-              _id: {
-                $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
-              },
-              count: { $sum: 1 },
-            },
-          },
-          {
-            $sort: { _id: 1 },
-          },
-        ]);
-
-        // Construct the array with zeros for missing days
-        const daysData = Array.from({ length: 7 }, (_, index) => {
-          const date = new Date(endDate);
-          date.setDate(date.getDate() - (6 - index)); // Get date for each day in the past week
-          const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
-
-          const dayData = result.find((item) => item._id === dateString);
-          return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
-        });
-        // console.log(daysData);
-        res
-          .status(200)
-          .send({ status: true, data: daysData, qrId, result: result });
-      } else if (type === "monthly") {
-        console.log("monthly");
-        const endDate = new Date(); // Current date
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 30); // Date 7 days ago
-
-        const result2 = await scanModel.aggregate([
-          {
-            $match: {
-              qrId: qrId,
-              timestamp: { $gte: startDate, $lt: endDate },
-            },
-          },
-          {
-            $group: {
-              _id: {
-                $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
-              },
-              count: { $sum: 1 },
-            },
-          },
-          {
-            $sort: { _id: 1 },
-          },
-        ]);
-
-        // Construct the array with zeros for missing days
-        const monthlyData = Array.from({ length: 30 }, (_, index) => {
-          const date = new Date(endDate);
-          date.setDate(date.getDate() - (29 - index)); // Get date for each day in the past week
-          const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
-
-          const dayData = result2.find((item) => item._id === dateString);
-          return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
-        });
-
-        res.status(200).send({ status: true, data: monthlyData });
-      } else if (type === "yearly") {
-        console.log("yearly");
-        const endDate = new Date(); // Current date
-        const startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1); // Date 1 year ago
-
-        try {
           const result = await scanModel.aggregate([
             {
               $match: {
-                qrId: qrId,
                 timestamp: { $gte: startDate, $lt: endDate },
+                qrId: new mongoose.Types.ObjectId(qrId),
               },
             },
             {
               $group: {
-                _id: { $dateToString: { format: "%Y-%m", date: "$timestamp" } },
+                _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
+                },
                 count: { $sum: 1 },
               },
             },
@@ -271,113 +197,37 @@ export let getScansAnalytics = async (req, res, next) => {
             },
           ]);
 
-          // Construct the array with zeros for missing months
-          const monthsData = Array.from({ length: 12 }, (_, index) => {
-            const monthDate = new Date(endDate);
-            monthDate.setMonth(monthDate.getMonth() - (11 - index)); // Get date for each month in the past year
-            const monthString = monthDate.toISOString().slice(0, 7); // Format month to "YYYY-MM"
+          // Construct the array with zeros for missing days
+          const daysData = Array.from({ length: 7 }, (_, index) => {
+            const date = new Date(endDate);
+            date.setDate(date.getDate() - (6 - index)); // Get date for each day in the past week
+            const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
 
-            const monthData = result.find((item) => item._id === monthString);
-            return monthData ? monthData.count : 0; // If data exists for the month, use count, otherwise 0
+            const dayData = result.find((item) => item._id === dateString);
+            return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
           });
-          // console.log("months", monthsData);
-          res.status(200).send({ status: true, data: monthsData });
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    } else {
-      if (type === "weakly") {
-        console.log("weakly");
-        const endDate = new Date(); // Current date
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 7); // Date 7 days ago
+          // console.log(daysData);
+          res
+            .status(200)
+            .send({ status: true, data: daysData, qrId, result: result });
+        } else if (type === "monthly") {
+          console.log("monthly");
+          const endDate = new Date(); // Current date
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30); // Date 7 days ago
 
-        const result = await scanModel.aggregate([
-          {
-            $match: {
-              userId: userId,
-              timestamp: { $gte: startDate, $lt: endDate },
-            },
-          },
-          {
-            $group: {
-              _id: {
-                $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
-              },
-              count: { $sum: 1 },
-            },
-          },
-          {
-            $sort: { _id: 1 },
-          },
-        ]);
-
-        // Construct the array with zeros for missing days
-        const daysData = Array.from({ length: 7 }, (_, index) => {
-          const date = new Date(endDate);
-          date.setDate(date.getDate() - (6 - index)); // Get date for each day in the past week
-          const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
-
-          const dayData = result.find((item) => item._id === dateString);
-          return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
-        });
-        // console.log(daysData);
-        res.status(200).send({ status: true, data: daysData });
-      } else if (type === "monthly") {
-        console.log("monthly");
-        const endDate = new Date(); // Current date
-        const startDate = new Date();
-        startDate.setDate(startDate.getDate() - 30); // Date 7 days ago
-
-        const result2 = await scanModel.aggregate([
-          {
-            $match: {
-              userId: userId,
-              timestamp: { $gte: startDate, $lt: endDate },
-            },
-          },
-          {
-            $group: {
-              _id: {
-                $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
-              },
-              count: { $sum: 1 },
-            },
-          },
-          {
-            $sort: { _id: 1 },
-          },
-        ]);
-
-        // Construct the array with zeros for missing days
-        const monthlyData = Array.from({ length: 30 }, (_, index) => {
-          const date = new Date(endDate);
-          date.setDate(date.getDate() - (29 - index)); // Get date for each day in the past week
-          const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
-
-          const dayData = result2.find((item) => item._id === dateString);
-          return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
-        });
-
-        res.status(200).send({ status: true, data: monthlyData });
-      } else if (type === "yearly") {
-        console.log("yearly");
-        const endDate = new Date(); // Current date
-        const startDate = new Date();
-        startDate.setFullYear(startDate.getFullYear() - 1); // Date 1 year ago
-
-        try {
-          const result = await scanModel.aggregate([
+          const result2 = await scanModel.aggregate([
             {
               $match: {
-                userId: userId,
+                qrId: new mongoose.Types.ObjectId(qrId),
                 timestamp: { $gte: startDate, $lt: endDate },
               },
             },
             {
               $group: {
-                _id: { $dateToString: { format: "%Y-%m", date: "$timestamp" } },
+                _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
+                },
                 count: { $sum: 1 },
               },
             },
@@ -386,21 +236,179 @@ export let getScansAnalytics = async (req, res, next) => {
             },
           ]);
 
-          // Construct the array with zeros for missing months
-          const monthsData = Array.from({ length: 12 }, (_, index) => {
-            const monthDate = new Date(endDate);
-            monthDate.setMonth(monthDate.getMonth() - (11 - index)); // Get date for each month in the past year
-            const monthString = monthDate.toISOString().slice(0, 7); // Format month to "YYYY-MM"
+          // Construct the array with zeros for missing days
+          const monthlyData = Array.from({ length: 30 }, (_, index) => {
+            const date = new Date(endDate);
+            date.setDate(date.getDate() - (29 - index)); // Get date for each day in the past week
+            const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
 
-            const monthData = result.find((item) => item._id === monthString);
-            return monthData ? monthData.count : 0; // If data exists for the month, use count, otherwise 0
+            const dayData = result2.find((item) => item._id === dateString);
+            return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
           });
-          // console.log("months", monthsData);
-          res.status(200).send({ status: true, data: monthsData });
-        } catch (error) {
-          console.log(error);
+
+          res.status(200).send({ status: true, data: monthlyData });
+        } else if (type === "yearly") {
+          console.log("yearly");
+          const endDate = new Date(); // Current date
+          const startDate = new Date();
+          startDate.setFullYear(startDate.getFullYear() - 1); // Date 1 year ago
+
+          try {
+            const result = await scanModel.aggregate([
+              {
+                $match: {
+                  qrId: new mongoose.Types.ObjectId(qrId),
+                  timestamp: { $gte: startDate, $lt: endDate },
+                },
+              },
+              {
+                $group: {
+                  _id: {
+                    $dateToString: { format: "%Y-%m", date: "$timestamp" },
+                  },
+                  count: { $sum: 1 },
+                },
+              },
+              {
+                $sort: { _id: 1 },
+              },
+            ]);
+
+            // Construct the array with zeros for missing months
+            const monthsData = Array.from({ length: 12 }, (_, index) => {
+              const monthDate = new Date(endDate);
+              monthDate.setMonth(monthDate.getMonth() - (11 - index)); // Get date for each month in the past year
+              const monthString = monthDate.toISOString().slice(0, 7); // Format month to "YYYY-MM"
+
+              const monthData = result.find((item) => item._id === monthString);
+              return monthData ? monthData.count : 0; // If data exists for the month, use count, otherwise 0
+            });
+            // console.log("months", monthsData);
+            res.status(200).send({ status: true, data: monthsData });
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      } else {
+        if (type === "weakly") {
+          console.log("weakly");
+          const endDate = new Date(); // Current date
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 7); // Date 7 days ago
+
+          const result = await scanModel.aggregate([
+            {
+              $match: {
+                userId: new mongoose.Types.ObjectId(userId),
+                timestamp: { $gte: startDate, $lt: endDate },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
+                },
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $sort: { _id: 1 },
+            },
+          ]);
+
+          // Construct the array with zeros for missing days
+          const daysData = Array.from({ length: 7 }, (_, index) => {
+            const date = new Date(endDate);
+            date.setDate(date.getDate() - (6 - index)); // Get date for each day in the past week
+            const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
+
+            const dayData = result.find((item) => item._id === dateString);
+            return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
+          });
+          // console.log(daysData);
+          res.status(200).send({ status: true, data: daysData });
+        } else if (type === "monthly") {
+          console.log("monthly");
+          const endDate = new Date(); // Current date
+          const startDate = new Date();
+          startDate.setDate(startDate.getDate() - 30); // Date 7 days ago
+
+          const result2 = await scanModel.aggregate([
+            {
+              $match: {
+                userId: new mongoose.Types.ObjectId(userId),
+                timestamp: { $gte: startDate, $lt: endDate },
+              },
+            },
+            {
+              $group: {
+                _id: {
+                  $dateToString: { format: "%Y-%m-%d", date: "$timestamp" },
+                },
+                count: { $sum: 1 },
+              },
+            },
+            {
+              $sort: { _id: 1 },
+            },
+          ]);
+
+          // Construct the array with zeros for missing days
+          const monthlyData = Array.from({ length: 30 }, (_, index) => {
+            const date = new Date(endDate);
+            date.setDate(date.getDate() - (29 - index)); // Get date for each day in the past week
+            const dateString = date.toISOString().split("T")[0]; // Format date to "YYYY-MM-DD"
+
+            const dayData = result2.find((item) => item._id === dateString);
+            return dayData ? dayData.count : 0; // If data exists for the day, use count, otherwise 0
+          });
+
+          res.status(200).send({ status: true, data: monthlyData });
+        } else if (type === "yearly") {
+          console.log("yearly");
+          const endDate = new Date(); // Current date
+          const startDate = new Date();
+          startDate.setFullYear(startDate.getFullYear() - 1); // Date 1 year ago
+
+          try {
+            const result = await scanModel.aggregate([
+              {
+                $match: {
+                  userId: new mongoose.Types.ObjectId(userId),
+                  timestamp: { $gte: startDate, $lt: endDate },
+                },
+              },
+              {
+                $group: {
+                  _id: {
+                    $dateToString: { format: "%Y-%m", date: "$timestamp" },
+                  },
+                  count: { $sum: 1 },
+                },
+              },
+              {
+                $sort: { _id: 1 },
+              },
+            ]);
+
+            // Construct the array with zeros for missing months
+            const monthsData = Array.from({ length: 12 }, (_, index) => {
+              const monthDate = new Date(endDate);
+              monthDate.setMonth(monthDate.getMonth() - (11 - index)); // Get date for each month in the past year
+              const monthString = monthDate.toISOString().slice(0, 7); // Format month to "YYYY-MM"
+
+              const monthData = result.find((item) => item._id === monthString);
+              return monthData ? monthData.count : 0; // If data exists for the month, use count, otherwise 0
+            });
+            // console.log("months", monthsData);
+            res.status(200).send({ status: true, data: monthsData });
+          } catch (error) {
+            console.log(error);
+          }
         }
       }
+    } catch (error) {
+      console.log(error);
     }
   } catch (error) {
     res
