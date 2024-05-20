@@ -180,7 +180,7 @@ export let getScansAnalytics = async (req, res, next) => {
           {
             $match: {
               timestamp: { $gte: startDate, $lt: endDate },
-              qrId: qrId,
+              qrId: mongoose.Types.ObjectId(qrId),
             },
           },
           {
