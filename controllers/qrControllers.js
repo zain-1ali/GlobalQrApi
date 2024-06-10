@@ -226,11 +226,31 @@ export let deleteQr = async (req, res, next) => {
       res.status(404).send({ status: false, msg: "Qr not found" });
     }
 
-    await QrModel.findByIdAndDelete(qrId);
-    const allQrs = await QrModel.find({ userId: userId });
-    res
-      .status(200)
-      .send({ status: true, msg: "Qr deleted successfuly", data: allQrs });
+    const deletedQr = await QrModel.findByIdAndDelete(qrId);
+    if (deletedQr) {
+      if (deletedQr?.status) {
+        await analyticsModel.findOneAndUpdate(
+          { userId },
+          {
+            $inc: { activeQrs: -1 },
+          }
+        );
+      } else {
+        await analyticsModel.findOneAndUpdate(
+          { userId },
+          {
+            $inc: { inactiveQrs: -1 },
+          }
+        );
+      }
+
+      const allQrs = await QrModel.find({ userId: userId });
+      res
+        .status(200)
+        .send({ status: true, msg: "Qr deleted successfuly", data: allQrs });
+    }
+
+    res.status(500).send({ status: false, msg: "internal server error" });
   } catch (error) {
     res
       .status(500)
