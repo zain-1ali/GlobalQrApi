@@ -212,21 +212,24 @@ export let deleteQr = async (req, res, next) => {
   try {
     const { qrId } = req.body;
     const userId = req.userId;
+
     if (!qrId) {
       console.log(qrId);
-      res.status(500).send({ status: false, msg: "qr id is required" });
+      return res.status(500).send({ status: false, msg: "qr id is required" });
     }
+
     if (!userId) {
-      res.status(401).send({ status: false, msg: "Unautherized!" });
+      return res.status(401).send({ status: false, msg: "Unautherized!" });
     }
 
     const singleQr = await QrModel.findOne({ _id: qrId });
 
     if (!singleQr) {
-      res.status(404).send({ status: false, msg: "Qr not found" });
+      return res.status(404).send({ status: false, msg: "Qr not found" });
     }
 
     const deletedQr = await QrModel.findByIdAndDelete(qrId);
+
     if (deletedQr) {
       console.log("test");
       if (deletedQr?.status) {
@@ -246,14 +249,16 @@ export let deleteQr = async (req, res, next) => {
       }
 
       const allQrs = await QrModel.find({ userId: userId });
-      res
+      return res
         .status(200)
         .send({ status: true, msg: "Qr deleted successfuly", data: allQrs });
     }
 
-    res.status(500).send({ status: false, msg: "internal server error" });
+    return res
+      .status(500)
+      .send({ status: false, msg: "internal server error" });
   } catch (error) {
-    res
+    return res
       .status(500)
       .send({ status: false, msg: "internal server error", error });
   }
