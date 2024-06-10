@@ -228,6 +228,7 @@ export let deleteQr = async (req, res, next) => {
 
     const deletedQr = await QrModel.findByIdAndDelete(qrId);
     if (deletedQr) {
+      console.log("test");
       if (deletedQr?.status) {
         await analyticsModel.findOneAndUpdate(
           { userId },
