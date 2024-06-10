@@ -11,7 +11,7 @@ let storage = multer.diskStorage({
       }
 
       // Find the file with the matching name (case-sensitive)
-      console.log(req.userId);
+      // console.log(req.userId);
       const matchingFile = files.find((singlefile) =>
         singlefile.startsWith(file.fieldname + "-" + req.userId)
       );
