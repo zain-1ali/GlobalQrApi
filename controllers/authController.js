@@ -98,7 +98,7 @@ export let GoogleAuthController = async (req, res, next) => {
         expiresIn: "1y",
       });
       res.status(200).send({
-        status: false,
+        status: true,
         msg: "Authenticated by google successfuly",
         token: theToken,
       });
