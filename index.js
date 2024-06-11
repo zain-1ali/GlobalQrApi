@@ -6,6 +6,9 @@ import qrroutes from "./routes/qr.js";
 import statsroutes from "./routes/analytics.js";
 import cors from "cors";
 import dotenv from "dotenv";
+// import passport from "passport";
+// import cookieSession from "cookie-session";
+// import passportSetup from "./passport.js"
 
 dotenv.config();
 const app = express();
@@ -15,7 +18,15 @@ const allowedOrigins = ["http://localhost:5173"]; // Add other domains as needed
 //   credentials: true,
 //   optionSuccessStatus: 200,
 // };
-
+// app.use(
+//   cookieSession({
+//     name: "session",
+//     keys: ["cyberwolve"],
+//     maxAge: 24 * 60 * 60 * 100,
+//   })
+// );
+// app.use(passport.initialize());
+// app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 

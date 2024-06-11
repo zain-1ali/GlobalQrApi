@@ -1,6 +1,7 @@
 import express from "express";
 
 import {
+  GoogleAuthController,
   SigninController,
   SignupController,
 } from "../controllers/authController.js";
@@ -12,5 +13,6 @@ const router = express.Router();
 router.post("/register", SignupController);
 // Login route
 router.post("/login", SigninController);
+router.post("/googleAuth", GoogleAuthController);
 
 export default router;

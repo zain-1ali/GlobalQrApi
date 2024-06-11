@@ -84,3 +84,50 @@ export let SigninController = async (req, res, next) => {
     });
   }
 };
+
+export let GoogleAuthController = async (req, res, next) => {
+  try {
+    if (!req.body.email) {
+      res.status(200).send({ status: false, msg: "email field is required" });
+    }
+
+    let userExist = await userModel.findOne({ email: req.body.email });
+
+    if (userExist) {
+      const theToken = Jwt.sign({ userId: userExist._id }, "mySecret", {
+        expiresIn: "1y",
+      });
+      res.status(200).send({
+        status: false,
+        msg: "Authenticated by google successfuly",
+        token: theToken,
+      });
+    }
+
+    let newUser = await userModel.create({
+      email: req.body.email,
+      password: "googleUser",
+      isAdmin: false,
+    });
+
+    let theToken = Jwt.sign({ userId: newUser._id }, "mySecret", {
+      expiresIn: "1y",
+    });
+
+    await analyticsModel.create({
+      userId: newUser?._id,
+    });
+
+    res.status(200).send({
+      status: true,
+      msg: "Authenticated by google successfuly",
+      token: theToken,
+    });
+  } catch (error) {
+    res.status(500).send({
+      status: false,
+      msg: "internal server error",
+      error,
+    });
+  }
+};
