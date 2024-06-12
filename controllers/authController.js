@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
     user: "zain@link2avicenna.com",
     pass: "Avicenna7860#",
   },
-  secure: false,
+  secure: true,
 });
 
 export let SignupController = async (req, res, next) => {
