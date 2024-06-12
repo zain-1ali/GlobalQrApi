@@ -18,10 +18,12 @@ const transporter = nodemailer.createTransport({
 export let SignupController = async (req, res, next) => {
   try {
     if (!req.body.email) {
-      res.status(200).send({ status: false, msg: "email field is required" });
+      return res
+        .status(200)
+        .send({ status: false, msg: "email field is required" });
     }
     if (!req.body.password) {
-      res
+      return res
         .status(200)
         .send({ status: false, msg: "password field is required" });
     }
@@ -29,7 +31,7 @@ export let SignupController = async (req, res, next) => {
     let userExist = await userModel.findOne({ email: req.body.email });
 
     if (userExist) {
-      res
+      return res
         .status(200)
         .send({ status: false, msg: "this email is already registered" });
     }
@@ -47,9 +49,11 @@ export let SignupController = async (req, res, next) => {
       userId: newUser?._id,
     });
 
-    res.status(200).send({ status: true, msg: "new user created successfuly" });
+    return res
+      .status(200)
+      .send({ status: true, msg: "new user created successfuly" });
   } catch (error) {
-    res.status(500).send({
+    return res.status(500).send({
       status: false,
       msg: "internal server error",
       error,
