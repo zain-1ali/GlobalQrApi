@@ -25,6 +25,7 @@ export let createQrController = async (req, res, next) => {
 
     // Extract base64 data and metadata
     const matches = logo.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+    var fileName = `qrlogo_${Date.now()}.png`;
     if (!matches || matches.length !== 3) {
       const type = matches[1];
       const base64Data = matches[2];
