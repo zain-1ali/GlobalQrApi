@@ -22,25 +22,27 @@ export let createQrController = async (req, res, next) => {
     } = req.body;
 
     const userId = req.userId;
-    // let logoData = Buffer.from(logo, "base64");
-    // fs.writeFile(logoData, "my-file.png");
-    // fs.writeFile(
-    //   "public/images/abc.jpg",
-    //   logoData,
-    //   {
-    //     encoding: "utf8",
-    //     flag: "w",
-    //     mode: 0o666,
-    //   },
-    //   (err) => {
-    //     if (err) console.log(err);
-    //     else {
-    //       console.log("File written successfully\n");
-    //       console.log("The written has the following contents:");
-    //       console.log(fs.readFileSync("movies.txt", "utf8"));
-    //     }
-    //   }
-    // );
+
+    // Extract base64 data and metadata
+    const matches = logo.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) {
+      const type = matches[1];
+      const base64Data = matches[2];
+      const buffer = Buffer.from(base64Data, "base64");
+
+      // Create unique filename
+      var fileName = `qrlogo_${Date.now()}.png`;
+
+      fs.writeFile(
+        path.join(__dirname, "public/images", fileName),
+        buffer,
+        (err) => {
+          if (err) {
+            return res.status(500).send("Error saving image");
+          }
+        }
+      );
+    }
 
     if (!url) {
       return res
@@ -67,11 +69,9 @@ export let createQrController = async (req, res, next) => {
           bodyShape,
           eyeShape,
           frameShape,
-          logo: req.files
-            ? req.files["logo"]?.length === 1
-              ? `http://localhost:4000/public/images/${req.files["logo"][0].filename}`
-              : ""
-            : "",
+          logo: matches
+            ? `https://global-qr-codes-9520601e1a2d.herokuapp.com/public/images/${fileName}`
+            : logo,
         }
       );
       return res
@@ -90,11 +90,9 @@ export let createQrController = async (req, res, next) => {
         status,
         totalScans,
         userId,
-        logo: req.files
-          ? req.files["logo"]?.length === 1
-            ? `http://localhost:4000/public/images/${req.files["logo"][0].filename}`
-            : ""
-          : "",
+        logo: matches
+          ? `https://global-qr-codes-9520601e1a2d.herokuapp.com/public/images/${fileName}`
+          : logo,
       });
 
       await analyticsModel.findOneAndUpdate(
