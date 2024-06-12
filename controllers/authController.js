@@ -20,12 +20,12 @@ export let SignupController = async (req, res, next) => {
     if (!req.body.email) {
       return res
         .status(200)
-        .send({ status: false, msg: "email field is required" });
+        .send({ status: false, msg: "Email field is required" });
     }
     if (!req.body.password) {
       return res
         .status(200)
-        .send({ status: false, msg: "password field is required" });
+        .send({ status: false, msg: "Password field is required" });
     }
 
     let userExist = await userModel.findOne({ email: req.body.email });
@@ -33,7 +33,7 @@ export let SignupController = async (req, res, next) => {
     if (userExist) {
       return res
         .status(200)
-        .send({ status: false, msg: "this email is already registered" });
+        .send({ status: false, msg: "This email is already registered" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -51,11 +51,11 @@ export let SignupController = async (req, res, next) => {
 
     return res
       .status(200)
-      .send({ status: true, msg: "new user created successfuly" });
+      .send({ status: true, msg: "New user created successfuly" });
   } catch (error) {
     return res.status(500).send({
       status: false,
-      msg: "internal server error",
+      msg: "Something went wrong",
       error,
     });
   }
@@ -64,36 +64,36 @@ export let SignupController = async (req, res, next) => {
 export let SigninController = async (req, res, next) => {
   try {
     if (!req.body.email) {
-      res.send({ status: false, msg: "all fields are required" });
+      return res.send({ status: false, msg: "All fields are required" });
     }
     if (!req.body.password) {
-      res.send({ status: false, msg: "all fields are required" });
+      return res.send({ status: false, msg: "All fields are required" });
     }
 
     let userExist = await userModel.findOne({ email: req.body.email });
 
     if (!userExist) {
-      res.send({ status: false, msg: "user not found" });
+      return res.send({ status: false, msg: "User not found" });
     }
 
     let isMatch = await bcrypt.compare(req.body.password, userExist.password);
 
     if (!isMatch) {
-      res.send({ status: false, msg: "wrong credentials!" });
+      return res.send({ status: false, msg: "Wrong credentials!" });
     }
 
     let theToken = Jwt.sign({ userId: userExist._id }, "mySecret", {
       expiresIn: "1y",
     });
 
-    res.status(200).send({
+    return res.status(200).send({
       status: true,
       msg: "Login successfuly",
       token: theToken,
       isAdmin: userExist?.isAdmin,
     });
   } catch (error) {
-    res.status(500).send({
+    return res.status(500).send({
       status: false,
       msg: "internal server error",
       error,
@@ -104,7 +104,9 @@ export let SigninController = async (req, res, next) => {
 export let GoogleAuthController = async (req, res, next) => {
   try {
     if (!req.body.email) {
-      res.status(200).send({ status: false, msg: "email field is required" });
+      return res
+        .status(200)
+        .send({ status: false, msg: "Email field is required" });
     }
 
     let userExist = await userModel.findOne({ email: req.body.email });
@@ -113,7 +115,7 @@ export let GoogleAuthController = async (req, res, next) => {
       const theToken = Jwt.sign({ userId: userExist._id }, "mySecret", {
         expiresIn: "1y",
       });
-      res.status(200).send({
+      return res.status(200).send({
         status: true,
         msg: "Authenticated by google successfuly",
         token: theToken,
@@ -134,15 +136,15 @@ export let GoogleAuthController = async (req, res, next) => {
       userId: newUser?._id,
     });
 
-    res.status(200).send({
+    return res.status(200).send({
       status: true,
       msg: "Authenticated by google successfuly",
       token: theToken,
     });
   } catch (error) {
-    res.status(500).send({
+    return res.status(500).send({
       status: false,
-      msg: "internal server error",
+      msg: "Something went wrong",
       error,
     });
   }
