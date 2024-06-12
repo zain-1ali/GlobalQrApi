@@ -18,7 +18,7 @@ export let updateAnalytics = async (req, res, next) => {
     let analyticsExist = await analyticsModel.findOne({ userId });
     if (qrId) {
       var qrExist = await QrModel.findOne({ _id: qrId });
-      if (!qrExist) {
+      if (!qrExist && type != "status") {
         return res.status(404).send({ status: false, msg: "Qr not found" });
       }
 
