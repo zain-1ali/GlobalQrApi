@@ -9,22 +9,28 @@ export let updateAnalytics = async (req, res, next) => {
     const userId = req.userId;
 
     if (!userId) {
-      res.status(401).send({ status: false, msg: "Unautherized" });
+      return res.status(401).send({ status: false, msg: "Unautherized" });
     }
     if (!type) {
-      res.status(500).send({ status: false, msg: "type is required" });
+      return res.status(500).send({ status: false, msg: "type is required" });
     }
 
     let analyticsExist = await analyticsModel.findOne({ userId });
     if (qrId) {
       var qrExist = await QrModel.findOne({ _id: qrId });
       if (!qrExist) {
-        res.status(404).send({ status: false, msg: "Qr not found" });
+        return res.status(404).send({ status: false, msg: "Qr not found" });
+      }
+
+      if (qrExist?.status === false) {
+        return res.status(200).send({ status: true, msg: "Qr is paused" });
       }
     }
 
     if (!analyticsExist) {
-      res.status(404).send({ status: false, msg: "Analytics not found" });
+      return res
+        .status(404)
+        .send({ status: false, msg: "Analytics not found" });
     }
 
     if (type === "create") {
@@ -81,7 +87,9 @@ export let updateAnalytics = async (req, res, next) => {
           }
         );
       }
-      res.status(200).send({ status: true, msg: "info updated successfuly" });
+      return res
+        .status(200)
+        .send({ status: true, msg: "info updated successfuly" });
     } else if (type === "status") {
       if (req.body.status === true) {
         await analyticsModel.findByIdAndUpdate(
@@ -128,11 +136,11 @@ export let updateAnalytics = async (req, res, next) => {
         }
       );
     } else {
-      res.status(500).send({ status: false, msg: "invalid type" });
+      return res.status(500).send({ status: false, msg: "invalid type" });
     }
   } catch (error) {
     console.log(error);
-    res
+    return res
       .status(500)
       .send({ status: false, msg: "internal server error", error });
   }

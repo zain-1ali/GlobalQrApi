@@ -43,12 +43,12 @@ export let createQrController = async (req, res, next) => {
     // );
 
     if (!url) {
-      res
+      return res
         .status(500)
         .send({ status: false, msg: "Url value should not be empty" });
     }
     if (!userId) {
-      res.status(401).send({ status: false, msg: "Unautherized!" });
+      return res.status(401).send({ status: false, msg: "Unautherized!" });
     }
 
     if (qrId) {
@@ -74,7 +74,9 @@ export let createQrController = async (req, res, next) => {
             : "",
         }
       );
-      res.status(200).send({ status: true, msg: "Qr updated successfuly" });
+      return res
+        .status(200)
+        .send({ status: true, msg: "Qr updated successfuly" });
     } else {
       let newQr = await QrModel.create({
         name,
@@ -117,21 +119,25 @@ export let getSingleQr = async (req, res, next) => {
     const { qrId } = req.body;
     const userId = req.userId;
     if (!qrId) {
-      res.status(500).send({ status: false, msg: "internel server error" });
+      return res
+        .status(500)
+        .send({ status: false, msg: "internel server error" });
     }
     if (!userId) {
-      res.status(401).send({ status: false, msg: "Unautherized!" });
+      return res.status(401).send({ status: false, msg: "Unautherized!" });
     }
 
     const singleQr = await QrModel.findOne({ _id: qrId });
 
     if (singleQr) {
-      res.status(200).send({ status: true, msg: "success", data: singleQr });
+      return res
+        .status(200)
+        .send({ status: true, msg: "success", data: singleQr });
     } else {
-      res.status(404).send({ status: false, msg: "Qr not found" });
+      return res.status(404).send({ status: false, msg: "Qr not found" });
     }
   } catch (error) {
-    res
+    return res
       .status(500)
       .send({ status: false, msg: "internal server error", error });
   }
@@ -164,7 +170,10 @@ export let scanQr = async (req, res, next) => {
     const reqiureQr = await QrModel.findOne({ _id: qrId });
 
     if (!reqiureQr) {
-      res.status(400).send({ status: false, msg: "Qr not found" });
+      return res.status(400).send({ status: false, msg: "Qr not found" });
+    }
+    if (reqiureQr?.status === false) {
+      return res.status(200).send({ status: true, msg: "Qr is paused" });
     }
     await scanModel.create({
       qrId,
@@ -202,7 +211,7 @@ export let scanQr = async (req, res, next) => {
 
     return res.redirect(checkIfUrl(reqiureQr.url));
   } catch (error) {
-    res
+    return res
       .status(500)
       .send({ status: false, msg: "internal server error", error });
   }

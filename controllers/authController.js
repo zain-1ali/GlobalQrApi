@@ -76,7 +76,7 @@ export let SigninController = async (req, res, next) => {
       return res.send({ status: false, msg: "User not found" });
     }
 
-    let isMatch = await bcrypt.compare(req.body.password, userExist.password);
+    let isMatch = bcrypt.compare(req.body.password, userExist.password);
 
     if (!isMatch) {
       return res.send({ status: false, msg: "Wrong credentials!" });
@@ -200,7 +200,7 @@ export const resetPassword = async (req, res) => {
     const { id, newPassword } = req.body;
 
     // Check if the user exists
-    const user = await userModel.findOne({ _id: id }).lean();
+    const user = await userModel.findOne({ _id: id });
     if (!user) {
       return res.status(404).json({ status: false, message: "User not found" });
     }
