@@ -23,28 +23,6 @@ export let createQrController = async (req, res, next) => {
 
     const userId = req.userId;
 
-    // Extract base64 data and metadata
-    const matches = logo.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
-    var fileName = `qrlogo_${Date.now()}.png`;
-    if (!matches || matches.length !== 3) {
-      const type = matches[1];
-      const base64Data = matches[2];
-      const buffer = Buffer.from(base64Data, "base64");
-
-      // Create unique filename
-      var fileName = `qrlogo_${Date.now()}.png`;
-
-      fs.writeFile(
-        path.join(__dirname, "public/images", fileName),
-        buffer,
-        (err) => {
-          if (err) {
-            return res.status(500).send("Error saving image");
-          }
-        }
-      );
-    }
-
     if (!url) {
       return res
         .status(500)
@@ -70,9 +48,7 @@ export let createQrController = async (req, res, next) => {
           bodyShape,
           eyeShape,
           frameShape,
-          logo: matches
-            ? `https://global-qr-codes-9520601e1a2d.herokuapp.com/public/images/${fileName}`
-            : logo,
+          logo,
         }
       );
       return res
@@ -91,9 +67,7 @@ export let createQrController = async (req, res, next) => {
         status,
         totalScans,
         userId,
-        logo: matches
-          ? `https://global-qr-codes-9520601e1a2d.herokuapp.com/public/images/${fileName}`
-          : logo,
+        logo,
       });
 
       await analyticsModel.findOneAndUpdate(
