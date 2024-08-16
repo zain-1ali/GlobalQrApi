@@ -17,6 +17,6 @@ router.post("/register", SignupController);
 router.post("/login", SigninController);
 router.post("/googleAuth", GoogleAuthController);
 router.post("/forgetPassword", forgotPassword);
-router.post("/resetPassword", resetPassword);
+router.post("/resetPassword", resetPassword); 
 
 export default router;

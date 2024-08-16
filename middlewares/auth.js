@@ -6,8 +6,6 @@ const userAuth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     // console.log(authHeader);
     if (!authHeader) {
-      // || !authHeader.startsWith("Bearer")
-      // next("Auth Failed 1");
       res.status(401).send({
         status: false,
         msg: "Auth Failed",

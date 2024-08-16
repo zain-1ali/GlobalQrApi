@@ -44,6 +44,9 @@ app.use("/api/auth/", authroutes);
 app.use("/api/user/", userroutes);
 app.use("/api/qr/", qrroutes);
 app.use("/api/analytics/", statsroutes);
+app.get("/", (req, res) => {
+  return res.send({ message: "Api working" });
+});
 
 connectDb();
 let prot = process.env.PORT || 4000;

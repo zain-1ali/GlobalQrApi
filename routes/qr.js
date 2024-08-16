@@ -16,7 +16,6 @@ const router = express.Router();
 router.post(
   "/create",
   userAuth,
-  uploadFile.fields([{ name: "logo2", maxCount: 1 }]),
   createQrController
 );
 
